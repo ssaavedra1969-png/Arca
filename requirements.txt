@@ -1,0 +1,43 @@
+# PyAfipWs - se usa stub local compatible con Python 3.11+
+customtkinter==5.2.2
+pillow==10.1.0
+openpyxl==3.1.2
+reportlab==4.0.9
+pycryptodome==3.19.0
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+loguru==0.7.2
+sqlalchemy==2.0.23
+alembic==1.13.0
+aiofiles==23.2.1
+httpx==0.25.2
+matplotlib==3.8.2
+qrcode==7.4.2
+lxml==4.9.4
+cryptography==41.0.7
+bcrypt==4.1.2
+python-multipart==0.0.6
+fastapi==0.104.1
+uvicorn==0.24.0
+websockets==12.0
+schedule==1.2.0
+apscheduler==3.10.4
+jsonschema==4.20.0
+python-dateutil==2.8.2
+babel==2.13.1
+pytz==2023.3.post1
+tinydb==4.8.0
+plyer==2.1.0
+pystray==0.19.10
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-asyncio==0.23.2
+coverage==7.3.2
+# Development
+black==23.11.0
+ruff==0.1.6
+mypy==1.7.0
+pre-commit==3.5.0

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCA Facturador - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">ARCA Facturador - Dashboard</h1>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-blue-900 p-4 rounded-lg">
+                <h3 class="text-sm opacity-75">Facturas Emitidas</h3>
+                <p class="text-3xl font-bold" id="kpi-facturas">-</p>
+            </div>
+            <div class="bg-green-900 p-4 rounded-lg">
+                <h3 class="text-sm opacity-75">Total Facturado</h3>
+                <p class="text-3xl font-bold" id="kpi-total">-</p>
+            </div>
+            <div class="bg-yellow-900 p-4 rounded-lg">
+                <h3 class="text-sm opacity-75">Pendientes</h3>
+                <p class="text-3xl font-bold" id="kpi-pendientes">-</p>
+            </div>
+            <div class="bg-red-900 p-4 rounded-lg">
+                <h3 class="text-sm opacity-75">Errores</h3>
+                <p class="text-3xl font-bold" id="kpi-errores">-</p>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Facturas por Mes</h3>
+                <canvas id="chart-mensual"></canvas>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-4">Distribucion por Tipo</h3>
+                <canvas id="chart-tipo"></canvas>
+            </div>
+        </div>
+
+        <!-- Facturas Recientes -->
+        <div class="bg-gray-800 rounded-lg p-4">
+            <h3 class="text-lg font-semibold mb-4">Facturas Recientes</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-400 border-b border-gray-700">
+                            <th class="p-2">Fecha</th>
+                            <th class="p-2">Tipo</th>
+                            <th class="p-2">Numero</th>
+                            <th class="p-2">Cliente</th>
+                            <th class="p-2">Total</th>
+                            <th class="p-2">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-facturas"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+
+        async function cargarDatos() {
+            try {
+                const [statsRes, facturasRes] = await Promise.all([
+                    fetch(`${API_URL}/estadisticas`),
+                    fetch(`${API_URL}/facturas?limit=10`),
+                ]);
+
+                const stats = await statsRes.json();
+                const facturas = await facturasRes.json();
+
+                actualizarKPIs(stats);
+                actualizarTabla(facturas.resultados || []);
+                actualizarGraficos(stats);
+            } catch (err) {
+                console.error("Error cargando datos:", err);
+            }
+        }
+
+        function actualizarKPIs(stats) {
+            document.getElementById('kpi-facturas').textContent = stats.cantidad_facturas || 0;
+            document.getElementById('kpi-total').textContent = 
+                '$ ' + (stats.total_facturado || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 });
+        }
+
+        function actualizarTabla(facturas) {
+            const tbody = document.getElementById('tabla-facturas');
+            tbody.innerHTML = facturas.map(f => `
+                <tr class="border-b border-gray-700 hover:bg-gray-700">
+                    <td class="p-2">${new Date(f.fecha).toLocaleDateString('es-AR')}</td>
+                    <td class="p-2">Tipo ${f.tipo}</td>
+                    <td class="p-2">${f.pv.toString().padStart(4, '0')}-${f.numero?.toString().padStart(8, '0') || ''}</td>
+                    <td class="p-2">${f.cliente}</td>
+                    <td class="p-2">$ ${f.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                    <td class="p-2"><span class="px-2 py-1 rounded text-xs ${
+                        f.estado === 'EMITIDA' ? 'bg-green-800' : 
+                        f.estado === 'PENDIENTE' ? 'bg-yellow-800' : 'bg-red-800'
+                    }">${f.estado}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function actualizarGraficos(stats) {
+            const meses = (stats.por_mes || []).map(m => m[0]);
+            const cantidades = (stats.por_mes || []).map(m => m[1]);
+
+            new Chart(document.getElementById('chart-mensual'), {
+                type: 'bar',
+                data: {
+                    labels: meses,
+                    datasets: [{
+                        label: 'Facturas',
+                        data: cantidades,
+                        backgroundColor: '#4CAF50',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: 'white' } } },
+                    scales: { 
+                        x: { ticks: { color: 'white' } },
+                        y: { ticks: { color: 'white' } }
+                    }
+                }
+            });
+
+            const tipos = (stats.por_tipo || []).map(t => `Tipo ${t[0]}`);
+            const totales = (stats.por_tipo || []).map(t => t[2]);
+
+            new Chart(document.getElementById('chart-tipo'), {
+                type: 'pie',
+                data: {
+                    labels: tipos,
+                    datasets: [{
+                        data: totales,
+                        backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: 'white' } } },
+                }
+            });
+        }
+
+        cargarDatos();
+        setInterval(cargarDatos, 30000);
+    </script>
+</body>
+</html>

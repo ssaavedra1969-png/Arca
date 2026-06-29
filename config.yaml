@@ -1,0 +1,67 @@
+app:
+  name: "ARCA Facturador"
+  version: "1.0.0"
+  debug: false
+  theme: "dark"
+  language: "es"
+
+database:
+  path: "data/arca_facturador.db"
+  wal_mode: true
+  backup_enabled: true
+  backup_interval_hours: 24
+  backup_dir: "data/backups"
+
+arca:
+  homo: true
+  cuit: 20345678901
+  punto_venta: 1
+  cert_file: "certs/certificado.crt"
+  key_file: "certs/clave.key"
+  wsaa_url: "https://wsaahomo.afip.gov.ar/ws/services/LoginCms"
+  wsfe_url: "https://wswhomo.afip.gov.ar/wsfev1/service.asmx"
+  timeout_connect: 30
+  timeout_read: 60
+  retry_max_attempts: 3
+  retry_base_delay: 2.0
+  retry_max_delay: 30.0
+  token_cache_minutes: 390
+
+seguridad:
+  encryption_algorithm: "aes-256-gcm"
+  log_level: "INFO"
+  log_retention_days: 30
+  log_rotation_bytes: 10485760  # 10MB
+  audit_enabled: true
+  session_timeout_minutes: 60
+
+reportes:
+  logo: "resources/logo.png"
+  footer: "Gracias por su compra"
+  papel: "A4"
+  copias: 1
+  qr_size: 100
+
+api_interna:
+  enabled: false
+  host: "127.0.0.1"
+  port: 8742
+  cors_origins:
+    - "http://localhost:3000"
+
+actualizaciones:
+  check_interval: 86400
+  repo_url: "https://api.github.com/repos/user/arca-facturador/releases/latest"
+  auto_download: false
+  channel: "stable"
+
+notificaciones:
+  certificado_aviso_dias: 7
+  sincronizacion_intervalo_minutos: 30
+  sonido: true
+
+moneda:
+  por_defecto: "ARS"
+  cotizacion_api: "https://api-dolar-argentina.herokuapp.com/api/dolaroficial"
+  cotizacion_automatica: true
+  actualizacion_cada_horas: 6

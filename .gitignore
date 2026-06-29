@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database
+*.db
+*.db-*
+data/
+
+# Logs
+logs/
+temp/
+*.log
+
+# Certificates
+certs/*.pem
+!certs/.gitkeep
+
+# Environment & secrets
+.env
+.env.local
+*.env
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Config backups
+config.backup.yaml
+
+# Reports generated
+reports/*.pdf
+reports/*.xlsx
+reports/*.xml
+
+# Firebase service account
+*.json
