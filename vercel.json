@@ -1,0 +1,12 @@
+{
+  "name": "arca",
+  "version": 2,
+  "buildCommand": null,
+  "outputDirectory": "web_dashboard",
+  "installCommand": null,
+  "devCommand": null,
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

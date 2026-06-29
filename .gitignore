@@ -48,3 +48,5 @@ reports/*.xml
 
 # Firebase service account
 *.json
+!vercel.json
+!web_dashboard/**/*.json
