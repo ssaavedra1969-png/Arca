@@ -3,69 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCA Facturador - Dashboard</title>
+    <title>ADMINISTRACION de FALPAT SRL</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #060612;
+            color: #F0F0F5;
+            min-height: 100vh;
+        }
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+            background: #060612;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; z-index: 50;
+        }
+        .sidebar::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(108,60,225,0.05), transparent, rgba(0,212,255,0.03));
+            pointer-events: none;
+        }
+        .brand {
+            padding: 20px 16px; display: flex; align-items: center; gap: 12px;
+            position: relative; z-index: 1;
+        }
+        .logo {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, #6C3CE1, #00D4FF);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 18px; color: white;
+            box-shadow: 0 4px 12px rgba(108,60,225,0.3);
+        }
+        .brand-text h2 { font-size: 16px; font-weight: 700; color: white; line-height: 1.2; }
+        .brand-text p { font-size: 9px; color: #6B6B8A; letter-spacing: 0.15em; text-transform: uppercase; }
+        .divider { height: 1px; margin: 0 16px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
+        .nav { flex: 1; padding: 12px; overflow-y: auto; position: relative; z-index: 1; }
+        .nav-section { margin-bottom: 8px; }
+        .nav-section-title {
+            font-size: 9px; font-weight: 700; color: #6B6B8A;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            padding: 8px 12px 4px;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; border-radius: 10px;
+            font-size: 13px; color: #B0B0D0; cursor: pointer;
+            transition: all 0.2s; text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(108,60,225,0.15), rgba(0,212,255,0.1));
+            border: 1px solid rgba(108,60,225,0.2); color: white;
+        }
+        .nav-icon {
+            width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .nav-icon.primary { background: linear-gradient(135deg, #6C3CE1, #00D4FF); color: white; }
+        .nav-icon.muted { background: rgba(255,255,255,0.05); color: #B0B0D0; }
+        .nav-indicator {
+            margin-left: auto; width: 4px; height: 20px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #6C3CE1, #00D4FF);
+            opacity: 0;
+        }
+        .nav-item.active .nav-indicator { opacity: 1; }
+        .footer {
+            padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05);
+            position: relative; z-index: 1;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+        .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #6C3CE1, #00D4FF);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: white;
+        }
+        .user-name { font-size: 13px; color: white; font-weight: 500; }
+        .user-role { font-size: 10px; color: #6B6B8A; }
+
+        .main { margin-left: 240px; display: flex; flex-direction: column; min-height: 100vh; }
+        .header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 24px; height: 56px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(6,6,18,0.8);
+            backdrop-filter: blur(20px);
+            position: sticky; top: 0; z-index: 40;
+        }
+        .header-title { font-size: 15px; font-weight: 600; color: white; }
+        .header-spacer { flex: 1; }
+        .header-badge {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            font-size: 11px; color: #6B6B8A;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .dot.green { background: #4CAF50; }
+
+        .content { padding: 24px; flex: 1; }
+        .page-title { font-size: 22px; font-weight: 700; color: white; margin-bottom: 20px; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+        .kpi-card {
+            background: rgba(13,13,31,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 16px;
+            position: relative; overflow: hidden;
+        }
+        .kpi-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .kpi-card.purple::before { background: linear-gradient(90deg, #6C3CE1, #00D4FF); }
+        .kpi-card.cyan::before { background: linear-gradient(90deg, #00D4FF, #6C3CE1); }
+        .kpi-card.orange::before { background: #FF9800; }
+        .kpi-card.red::before { background: #E53935; }
+        .kpi-label { font-size: 11px; color: #6B6B8A; margin-bottom: 4px; }
+        .kpi-value { font-size: 24px; font-weight: 700; color: white; }
+
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+        .chart-card {
+            background: rgba(13,13,31,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 20px;
+        }
+        .chart-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 16px; }
+
+        .table-card {
+            background: rgba(13,13,31,0.8);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 20px;
+        }
+        .table-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 10px 12px; color: #6B6B8A; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #B0B0D0; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .status { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+        .status.emitida { background: rgba(76,175,80,0.15); color: #4CAF50; }
+        .status.pendiente { background: rgba(255,152,0,0.15); color: #FF9800; }
+        .status.error { background: rgba(229,57,53,0.15); color: #E53935; }
+        .status.anulada { background: rgba(107,107,138,0.15); color: #6B6B8A; }
+        .loading { text-align: center; padding: 40px; color: #6B6B8A; }
+        .loading svg { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="bg-gray-900 text-white">
-    <div class="container mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6">ARCA Facturador - Dashboard</h1>
-
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-blue-900 p-4 rounded-lg">
-                <h3 class="text-sm opacity-75">Facturas Emitidas</h3>
-                <p class="text-3xl font-bold" id="kpi-facturas">-</p>
-            </div>
-            <div class="bg-green-900 p-4 rounded-lg">
-                <h3 class="text-sm opacity-75">Total Facturado</h3>
-                <p class="text-3xl font-bold" id="kpi-total">-</p>
-            </div>
-            <div class="bg-yellow-900 p-4 rounded-lg">
-                <h3 class="text-sm opacity-75">Pendientes</h3>
-                <p class="text-3xl font-bold" id="kpi-pendientes">-</p>
-            </div>
-            <div class="bg-red-900 p-4 rounded-lg">
-                <h3 class="text-sm opacity-75">Errores</h3>
-                <p class="text-3xl font-bold" id="kpi-errores">-</p>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo">F</div>
+            <div class="brand-text">
+                <h2>FALPAT SRL</h2>
+                <p>Administración</p>
             </div>
         </div>
-
-        <!-- Charts -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h3 class="text-lg font-semibold mb-4">Facturas por Mes</h3>
-                <canvas id="chart-mensual"></canvas>
+        <div class="divider"></div>
+        <nav class="nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Principal</div>
+                <a class="nav-item active" href="/">
+                    <div class="nav-icon primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    </div>
+                    Dashboard
+                    <div class="nav-indicator"></div>
+                </a>
             </div>
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h3 class="text-lg font-semibold mb-4">Distribucion por Tipo</h3>
-                <canvas id="chart-tipo"></canvas>
+            <div class="nav-section">
+                <div class="nav-section-title">Gestión</div>
+                <a class="nav-item" href="#">
+                    <div class="nav-icon muted">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    Clientes
+                </a>
+                <a class="nav-item" href="#">
+                    <div class="nav-icon muted">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    </div>
+                    Productos
+                </a>
+                <a class="nav-item" href="#">
+                    <div class="nav-icon muted">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    Facturación
+                </a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Informes</div>
+                <a class="nav-item" href="#">
+                    <div class="nav-icon muted">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    Reportes
+                </a>
+            </div>
+        </nav>
+        <div class="footer">
+            <div class="user-info">
+                <div class="avatar">FS</div>
+                <div>
+                    <div class="user-name">FALPAT SRL</div>
+                    <div class="user-role">Administrador</div>
+                </div>
             </div>
         </div>
+    </aside>
 
-        <!-- Facturas Recientes -->
-        <div class="bg-gray-800 rounded-lg p-4">
-            <h3 class="text-lg font-semibold mb-4">Facturas Recientes</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="text-left text-gray-400 border-b border-gray-700">
-                            <th class="p-2">Fecha</th>
-                            <th class="p-2">Tipo</th>
-                            <th class="p-2">Numero</th>
-                            <th class="p-2">Cliente</th>
-                            <th class="p-2">Total</th>
-                            <th class="p-2">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-facturas"></tbody>
-                </table>
+    <div class="main">
+        <header class="header">
+            <div class="header-title">Panel de Control</div>
+            <div class="header-spacer"></div>
+            <div class="header-badge">
+                <div class="dot green"></div>
+                Conectado
             </div>
-        </div>
+            <div class="header-badge" id="fecha-actual"></div>
+        </header>
+
+        <main class="content">
+            <h1 class="page-title">Dashboard</h1>
+
+            <div class="kpi-grid">
+                <div class="kpi-card purple">
+                    <div class="kpi-label">Facturas Emitidas</div>
+                    <div class="kpi-value" id="kpi-facturas">
+                        <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                    </div>
+                </div>
+                <div class="kpi-card cyan">
+                    <div class="kpi-label">Total Facturado</div>
+                    <div class="kpi-value" id="kpi-total">
+                        <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                    </div>
+                </div>
+                <div class="kpi-card orange">
+                    <div class="kpi-label">Pendientes</div>
+                    <div class="kpi-value" id="kpi-pendientes">
+                        <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                    </div>
+                </div>
+                <div class="kpi-card red">
+                    <div class="kpi-label">Certificado</div>
+                    <div class="kpi-value" id="kpi-certificado">
+                        <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">Facturas por Mes</div>
+                    <canvas id="chart-mensual"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribución por Tipo</div>
+                    <canvas id="chart-tipo"></canvas>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-title">Facturas Recientes</div>
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Número</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-facturas">
+                            <tr><td colspan="6" class="loading">Cargando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        const API_URL = window.location.origin;
+        const API_URL = '/api';
+
+        document.getElementById('fecha-actual').textContent =
+            new Date().toLocaleDateString('es-AR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
         async function cargarDatos() {
             try {
@@ -81,53 +310,66 @@
                 actualizarTabla(facturas.resultados || []);
                 actualizarGraficos(stats);
             } catch (err) {
-                console.error("Error cargando datos:", err);
+                document.querySelectorAll('.kpi-value').forEach(el => {
+                    if (el.querySelector('.loading')) el.textContent = 'N/A';
+                });
+                document.getElementById('tabla-facturas').innerHTML =
+                    '<tr><td colspan="6" style="text-align:center;color:#6B6B8A;padding:20px">API no disponible. Ejecute la aplicación de escritorio.</td></tr>';
             }
         }
 
         function actualizarKPIs(stats) {
             document.getElementById('kpi-facturas').textContent = stats.cantidad_facturas || 0;
-            document.getElementById('kpi-total').textContent = 
-                '$ ' + (stats.total_facturado || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 });
+            document.getElementById('kpi-total').textContent = '$ ' + (stats.total_facturado || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 });
+            document.getElementById('kpi-pendientes').textContent = stats.pendientes || 0;
+            document.getElementById('kpi-certificado').textContent = (stats.dias_certificado || '--') + ' días';
         }
 
         function actualizarTabla(facturas) {
             const tbody = document.getElementById('tabla-facturas');
+            if (!facturas.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#6B6B8A;padding:20px">No hay facturas registradas</td></tr>';
+                return;
+            }
             tbody.innerHTML = facturas.map(f => `
-                <tr class="border-b border-gray-700 hover:bg-gray-700">
-                    <td class="p-2">${new Date(f.fecha).toLocaleDateString('es-AR')}</td>
-                    <td class="p-2">Tipo ${f.tipo}</td>
-                    <td class="p-2">${f.pv.toString().padStart(4, '0')}-${f.numero?.toString().padStart(8, '0') || ''}</td>
-                    <td class="p-2">${f.cliente}</td>
-                    <td class="p-2">$ ${f.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                    <td class="p-2"><span class="px-2 py-1 rounded text-xs ${
-                        f.estado === 'EMITIDA' ? 'bg-green-800' : 
-                        f.estado === 'PENDIENTE' ? 'bg-yellow-800' : 'bg-red-800'
-                    }">${f.estado}</span></td>
+                <tr>
+                    <td>${new Date(f.fecha).toLocaleDateString('es-AR')}</td>
+                    <td>Tipo ${f.tipo}</td>
+                    <td>${String(f.pv).padStart(4,'0')}-${String(f.numero||'').padStart(8,'0')}</td>
+                    <td>${f.cliente || '—'}</td>
+                    <td>$ ${(f.total||0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                    <td><span class="status ${(f.estado||'').toLowerCase()}">${f.estado||'—'}</span></td>
                 </tr>
             `).join('');
         }
 
         function actualizarGraficos(stats) {
+            const ctx1 = document.getElementById('chart-mensual');
+            const ctx2 = document.getElementById('chart-tipo');
+            if (!ctx1 || !ctx2) return;
+
             const meses = (stats.por_mes || []).map(m => m[0]);
             const cantidades = (stats.por_mes || []).map(m => m[1]);
 
-            new Chart(document.getElementById('chart-mensual'), {
+            new Chart(ctx1, {
                 type: 'bar',
                 data: {
                     labels: meses,
                     datasets: [{
                         label: 'Facturas',
                         data: cantidades,
-                        backgroundColor: '#4CAF50',
+                        backgroundColor: '#6C3CE1',
+                        borderRadius: 4,
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { labels: { color: 'white' } } },
-                    scales: { 
-                        x: { ticks: { color: 'white' } },
-                        y: { ticks: { color: 'white' } }
+                    plugins: {
+                        legend: { labels: { color: '#B0B0D0', font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#6B6B8A' }, grid: { color: 'rgba(255,255,255,0.03)' } },
+                        y: { ticks: { color: '#6B6B8A' }, grid: { color: 'rgba(255,255,255,0.03)' } }
                     }
                 }
             });
@@ -135,18 +377,21 @@
             const tipos = (stats.por_tipo || []).map(t => `Tipo ${t[0]}`);
             const totales = (stats.por_tipo || []).map(t => t[2]);
 
-            new Chart(document.getElementById('chart-tipo'), {
-                type: 'pie',
+            new Chart(ctx2, {
+                type: 'doughnut',
                 data: {
                     labels: tipos,
                     datasets: [{
                         data: totales,
-                        backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#E91E63'],
+                        backgroundColor: ['#6C3CE1', '#00D4FF', '#FF9800', '#E53935', '#4CAF50'],
+                        borderWidth: 0,
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { labels: { color: 'white' } } },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#B0B0D0', font: { size: 11 }, padding: 16 } }
+                    }
                 }
             });
         }
