@@ -3,26 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMINISTRACION de FALPAT SRL</title>
+    <title>ARCA Facturador - Panel de Control</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: #060612;
-            color: #F0F0F5;
+            background: #FBF3E8;
+            color: #292524;
             min-height: 100vh;
         }
         .sidebar {
             position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
-            background: #060612;
-            border-right: 1px solid rgba(255,255,255,0.05);
+            background: linear-gradient(180deg, #FAF1E6, #F5E6D0);
+            border-right: 1px solid #E7E5E4;
             display: flex; flex-direction: column; z-index: 50;
-        }
-        .sidebar::before {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(180deg, rgba(108,60,225,0.05), transparent, rgba(0,212,255,0.03));
-            pointer-events: none;
         }
         .brand {
             padding: 20px 16px; display: flex; align-items: center; gap: 12px;
@@ -30,135 +25,167 @@
         }
         .logo {
             width: 40px; height: 40px; border-radius: 12px;
-            background: linear-gradient(135deg, #6C3CE1, #00D4FF);
+            background: linear-gradient(135deg, #B45309, #D97706);
             display: flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 18px; color: white;
-            box-shadow: 0 4px 12px rgba(108,60,225,0.3);
+            box-shadow: 0 4px 12px rgba(180,83,9,0.25);
         }
-        .brand-text h2 { font-size: 16px; font-weight: 700; color: white; line-height: 1.2; }
-        .brand-text p { font-size: 9px; color: #6B6B8A; letter-spacing: 0.15em; text-transform: uppercase; }
-        .divider { height: 1px; margin: 0 16px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
+        .brand-text h2 { font-size: 16px; font-weight: 700; color: #292524; line-height: 1.2; }
+        .brand-text p { font-size: 9px; color: #78716C; letter-spacing: 0.15em; text-transform: uppercase; }
+        .divider { height: 1px; margin: 0 16px; background: linear-gradient(90deg, transparent, #D6D3D1, transparent); }
         .nav { flex: 1; padding: 12px; overflow-y: auto; position: relative; z-index: 1; }
         .nav-section { margin-bottom: 8px; }
         .nav-section-title {
-            font-size: 9px; font-weight: 700; color: #6B6B8A;
+            font-size: 9px; font-weight: 700; color: #A8A29E;
             text-transform: uppercase; letter-spacing: 0.2em;
             padding: 8px 12px 4px;
         }
         .nav-item {
             display: flex; align-items: center; gap: 10px;
             padding: 8px 12px; border-radius: 10px;
-            font-size: 13px; color: #B0B0D0; cursor: pointer;
+            font-size: 13px; color: #57534E; cursor: pointer;
             transition: all 0.2s; text-decoration: none;
         }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item:hover { background: rgba(217,119,6,0.08); color: #292524; }
         .nav-item.active {
-            background: linear-gradient(135deg, rgba(108,60,225,0.15), rgba(0,212,255,0.1));
-            border: 1px solid rgba(108,60,225,0.2); color: white;
+            background: rgba(217,119,6,0.12);
+            border: 1px solid rgba(217,119,6,0.2); color: #92400E;
+            font-weight: 600;
         }
         .nav-icon {
             width: 28px; height: 28px; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 14px;
         }
-        .nav-icon.primary { background: linear-gradient(135deg, #6C3CE1, #00D4FF); color: white; }
-        .nav-icon.muted { background: rgba(255,255,255,0.05); color: #B0B0D0; }
+        .nav-icon.primary {
+            background: linear-gradient(135deg, #B45309, #D97706);
+            color: white;
+        }
+        .nav-icon.muted { background: rgba(120,113,108,0.1); color: #78716C; }
         .nav-indicator {
             margin-left: auto; width: 4px; height: 20px;
             border-radius: 2px;
-            background: linear-gradient(180deg, #6C3CE1, #00D4FF);
+            background: linear-gradient(180deg, #D97706, #F59E0B);
             opacity: 0;
         }
         .nav-item.active .nav-indicator { opacity: 1; }
         .footer {
-            padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 12px 16px; border-top: 1px solid #E7E5E4;
             position: relative; z-index: 1;
         }
         .user-info { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
         .avatar {
             width: 32px; height: 32px; border-radius: 50%;
-            background: linear-gradient(135deg, #6C3CE1, #00D4FF);
+            background: linear-gradient(135deg, #B45309, #D97706);
             display: flex; align-items: center; justify-content: center;
             font-size: 11px; font-weight: 700; color: white;
         }
-        .user-name { font-size: 13px; color: white; font-weight: 500; }
-        .user-role { font-size: 10px; color: #6B6B8A; }
+        .user-name { font-size: 13px; color: #292524; font-weight: 500; }
+        .user-role { font-size: 10px; color: #78716C; }
 
         .main { margin-left: 240px; display: flex; flex-direction: column; min-height: 100vh; }
         .header {
             display: flex; align-items: center; gap: 12px;
             padding: 0 24px; height: 56px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            background: rgba(6,6,18,0.8);
+            border-bottom: 1px solid #E7E5E4;
+            background: rgba(251,243,232,0.85);
             backdrop-filter: blur(20px);
             position: sticky; top: 0; z-index: 40;
         }
-        .header-title { font-size: 15px; font-weight: 600; color: white; }
+        .header-title { font-size: 15px; font-weight: 600; color: #292524; }
         .header-spacer { flex: 1; }
         .header-badge {
             display: flex; align-items: center; gap: 6px;
             padding: 4px 12px; border-radius: 8px;
-            background: rgba(255,255,255,0.05);
-            font-size: 11px; color: #6B6B8A;
+            background: rgba(120,113,108,0.08);
+            font-size: 11px; color: #78716C;
         }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
-        .dot.green { background: #4CAF50; }
+        .dot.green { background: #16A34A; }
 
         .content { padding: 24px; flex: 1; }
-        .page-title { font-size: 22px; font-weight: 700; color: white; margin-bottom: 20px; }
+        .page-title {
+            font-size: 22px; font-weight: 700; color: #292524;
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .page-title::before {
+            content: '';
+            display: inline-block; width: 4px; height: 24px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #D97706, #F59E0B);
+        }
 
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
         .kpi-card {
-            background: rgba(13,13,31,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: white;
+            border: 1px solid #E7E5E4;
             border-radius: 12px; padding: 16px;
             position: relative; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
         .kpi-card::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
         }
-        .kpi-card.purple::before { background: linear-gradient(90deg, #6C3CE1, #00D4FF); }
-        .kpi-card.cyan::before { background: linear-gradient(90deg, #00D4FF, #6C3CE1); }
-        .kpi-card.orange::before { background: #FF9800; }
-        .kpi-card.red::before { background: #E53935; }
-        .kpi-label { font-size: 11px; color: #6B6B8A; margin-bottom: 4px; }
-        .kpi-value { font-size: 24px; font-weight: 700; color: white; }
+        .kpi-card.amber::before { background: linear-gradient(90deg, #D97706, #F59E0B); }
+        .kpi-card.teal::before { background: linear-gradient(90deg, #0D9488, #14B8A6); }
+        .kpi-card.orange::before { background: linear-gradient(90deg, #EA580C, #F97316); }
+        .kpi-card.stone::before { background: linear-gradient(90deg, #78716C, #A8A29E); }
+        .kpi-label { font-size: 11px; color: #78716C; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .kpi-value { font-size: 24px; font-weight: 700; color: #292524; }
 
         .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
         .chart-card {
-            background: rgba(13,13,31,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: white;
+            border: 1px solid #E7E5E4;
             border-radius: 12px; padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
-        .chart-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 16px; }
+        .chart-title { font-size: 14px; font-weight: 600; color: #292524; margin-bottom: 16px; }
 
         .table-card {
-            background: rgba(13,13,31,0.8);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: white;
+            border: 1px solid #E7E5E4;
             border-radius: 12px; padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
-        .table-title { font-size: 14px; font-weight: 600; color: white; margin-bottom: 12px; }
+        .table-title { font-size: 14px; font-weight: 600; color: #292524; margin-bottom: 12px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; padding: 10px 12px; color: #6B6B8A; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #B0B0D0; }
-        tr:hover td { background: rgba(255,255,255,0.02); }
+        th { text-align: left; padding: 10px 12px; color: #A8A29E; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E7E5E4; background: #FAFAF9; }
+        td { padding: 10px 12px; border-bottom: 1px solid #F5F5F4; color: #57534E; }
+        tr:hover td { background: #FFF7ED; }
         .status { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; }
-        .status.emitida { background: rgba(76,175,80,0.15); color: #4CAF50; }
-        .status.pendiente { background: rgba(255,152,0,0.15); color: #FF9800; }
-        .status.error { background: rgba(229,57,53,0.15); color: #E53935; }
-        .status.anulada { background: rgba(107,107,138,0.15); color: #6B6B8A; }
-        .loading { text-align: center; padding: 40px; color: #6B6B8A; }
+        .status.emitida { background: #F0FDF4; color: #16A34A; }
+        .status.pendiente { background: #FFFBEB; color: #D97706; }
+        .status.error { background: #FEF2F2; color: #DC2626; }
+        .status.anulada { background: #F5F5F4; color: #78716C; }
+        .loading { text-align: center; padding: 40px; color: #A8A29E; }
         .loading svg { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        select, input, button {
+            font-family: inherit;
+        }
+        .filters {
+            display: flex; gap: 12px; align-items: center;
+            margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 6px 16px; border-radius: 8px; border: 1px solid #E7E5E4;
+            background: white; color: #57534E; font-size: 12px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-btn:hover { border-color: #D97706; color: #D97706; }
+        .filter-btn.active { background: #D97706; color: white; border-color: #D97706; }
     </style>
 </head>
 <body>
     <aside class="sidebar">
         <div class="brand">
-            <div class="logo">F</div>
+            <div class="logo">A</div>
             <div class="brand-text">
-                <h2>FALPAT SRL</h2>
-                <p>Administración</p>
+                <h2>ARCA Facturador</h2>
+                <p>Panel de Control</p>
             </div>
         </div>
         <div class="divider"></div>
@@ -174,42 +201,36 @@
                 </a>
             </div>
             <div class="nav-section">
-                <div class="nav-section-title">Gestión</div>
-                <a class="nav-item" href="#">
-                    <div class="nav-icon muted">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    Clientes
-                </a>
-                <a class="nav-item" href="#">
-                    <div class="nav-icon muted">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                    </div>
-                    Productos
-                </a>
+                <div class="nav-section-title">Facturación</div>
                 <a class="nav-item" href="#">
                     <div class="nav-icon muted">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </div>
-                    Facturación
+                    Emitir Factura
+                </a>
+                <a class="nav-item" href="#">
+                    <div class="nav-icon muted">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    Historial
                 </a>
             </div>
             <div class="nav-section">
-                <div class="nav-section-title">Informes</div>
+                <div class="nav-section-title">Reportes</div>
                 <a class="nav-item" href="#">
                     <div class="nav-icon muted">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                     </div>
-                    Reportes
+                    Estadísticas
                 </a>
             </div>
         </nav>
         <div class="footer">
             <div class="user-info">
-                <div class="avatar">FS</div>
+                <div class="avatar">AS</div>
                 <div>
-                    <div class="user-name">FALPAT SRL</div>
-                    <div class="user-role">Administrador</div>
+                    <div class="user-name">ARCA Sistema</div>
+                    <div class="user-role">Facturación Electrónica</div>
                 </div>
             </div>
         </div>
@@ -221,7 +242,7 @@
             <div class="header-spacer"></div>
             <div class="header-badge">
                 <div class="dot green"></div>
-                Conectado
+                Sistema Listo
             </div>
             <div class="header-badge" id="fecha-actual"></div>
         </header>
@@ -230,13 +251,13 @@
             <h1 class="page-title">Dashboard</h1>
 
             <div class="kpi-grid">
-                <div class="kpi-card purple">
+                <div class="kpi-card amber">
                     <div class="kpi-label">Facturas Emitidas</div>
                     <div class="kpi-value" id="kpi-facturas">
                         <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
                     </div>
                 </div>
-                <div class="kpi-card cyan">
+                <div class="kpi-card teal">
                     <div class="kpi-label">Total Facturado</div>
                     <div class="kpi-value" id="kpi-total">
                         <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
@@ -248,7 +269,7 @@
                         <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
                     </div>
                 </div>
-                <div class="kpi-card red">
+                <div class="kpi-card stone">
                     <div class="kpi-label">Certificado</div>
                     <div class="kpi-value" id="kpi-certificado">
                         <div class="loading" style="padding:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
@@ -303,6 +324,8 @@
                     fetch(`${API_URL}/facturas?limit=10`),
                 ]);
 
+                if (!statsRes.ok || !facturasRes.ok) throw new Error('API no disponible');
+
                 const stats = await statsRes.json();
                 const facturas = await facturasRes.json();
 
@@ -311,10 +334,10 @@
                 actualizarGraficos(stats);
             } catch (err) {
                 document.querySelectorAll('.kpi-value').forEach(el => {
-                    if (el.querySelector('.loading')) el.textContent = 'N/A';
+                    if (el.querySelector('.loading')) el.textContent = '—';
                 });
                 document.getElementById('tabla-facturas').innerHTML =
-                    '<tr><td colspan="6" style="text-align:center;color:#6B6B8A;padding:20px">API no disponible. Ejecute la aplicación de escritorio.</td></tr>';
+                    '<tr><td colspan="6" style="text-align:center;color:#A8A29E;padding:20px">Ejecute la aplicación de escritorio para ver datos en vivo</td></tr>';
             }
         }
 
@@ -322,13 +345,13 @@
             document.getElementById('kpi-facturas').textContent = stats.cantidad_facturas || 0;
             document.getElementById('kpi-total').textContent = '$ ' + (stats.total_facturado || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 });
             document.getElementById('kpi-pendientes').textContent = stats.pendientes || 0;
-            document.getElementById('kpi-certificado').textContent = (stats.dias_certificado || '--') + ' días';
+            document.getElementById('kpi-certificado').textContent = (stats.dias_certificado ?? '—') + ' días';
         }
 
         function actualizarTabla(facturas) {
             const tbody = document.getElementById('tabla-facturas');
             if (!facturas.length) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#6B6B8A;padding:20px">No hay facturas registradas</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#A8A29E;padding:20px">No hay facturas registradas</td></tr>';
                 return;
             }
             tbody.innerHTML = facturas.map(f => `
@@ -358,18 +381,18 @@
                     datasets: [{
                         label: 'Facturas',
                         data: cantidades,
-                        backgroundColor: '#6C3CE1',
+                        backgroundColor: '#D97706',
                         borderRadius: 4,
                     }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { labels: { color: '#B0B0D0', font: { size: 11 } } }
+                        legend: { labels: { color: '#78716C', font: { size: 11 } } }
                     },
                     scales: {
-                        x: { ticks: { color: '#6B6B8A' }, grid: { color: 'rgba(255,255,255,0.03)' } },
-                        y: { ticks: { color: '#6B6B8A' }, grid: { color: 'rgba(255,255,255,0.03)' } }
+                        x: { ticks: { color: '#A8A29E' }, grid: { color: 'rgba(120,113,108,0.08)' } },
+                        y: { ticks: { color: '#A8A29E' }, grid: { color: 'rgba(120,113,108,0.08)' } }
                     }
                 }
             });
@@ -383,14 +406,14 @@
                     labels: tipos,
                     datasets: [{
                         data: totales,
-                        backgroundColor: ['#6C3CE1', '#00D4FF', '#FF9800', '#E53935', '#4CAF50'],
+                        backgroundColor: ['#D97706', '#0D9488', '#EA580C', '#78716C', '#2563EB'],
                         borderWidth: 0,
                     }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: '#B0B0D0', font: { size: 11 }, padding: 16 } }
+                        legend: { position: 'bottom', labels: { color: '#78716C', font: { size: 11 }, padding: 16 } }
                     }
                 }
             });
